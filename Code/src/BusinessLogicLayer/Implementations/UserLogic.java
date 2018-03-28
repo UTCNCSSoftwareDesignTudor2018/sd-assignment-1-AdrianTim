@@ -1,6 +1,6 @@
 package BusinessLogicLayer.Implementations;
 
-import BusinessLogicLayer.BusinessEntities.User;
+import DataAccessLayer.Entities.User;
 import BusinessLogicLayer.IUserLogic;
 import DataAccessLayer.IReflectiveDAO;
 import DataAccessLayer.IUserDAO;
@@ -24,21 +24,28 @@ public class UserLogic implements IUserLogic {
     }
 
     @Override
-    public void register(String username, String password) throws NoSuchAlgorithmException, IllegalAccessException, SQLException, ClassNotFoundException {
+    public boolean register(String username, String password) throws NoSuchAlgorithmException, IllegalAccessException, SQLException, ClassNotFoundException {
 
         // Compute the hash for the password
 
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] hash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
+        if(username.length() >= 5 && password.length() >= 5) {
 
-        String passwordHash = new String(Base64.getEncoder().encode(hash));
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
 
-        reflectiveDAO.insert(new User(username, passwordHash));
+            String passwordHash = new String(Base64.getEncoder().encode(hash));
 
+            reflectiveDAO.insert(new User(username, passwordHash));
+
+            return true;
+
+        }
+
+        return false;
     }
 
     @Override
-    public boolean login(String username, String password) throws SQLException, NoSuchAlgorithmException {
+    public String login(String username, String password) throws SQLException, NoSuchAlgorithmException {
 
         User user = userDAO.get(username);
 
@@ -46,10 +53,13 @@ public class UserLogic implements IUserLogic {
         byte[] hash = digest.digest(password.getBytes(StandardCharsets.UTF_8));
         String paswd = new String(Base64.getEncoder().encode(hash));
 
-        // more stuff to be done
+       if(paswd.equals(user.getPassword())){
 
-       return paswd.equals(user.getPassword());
+           return user.getUsername();
 
+       };
+
+        return "";
     }
 
 }

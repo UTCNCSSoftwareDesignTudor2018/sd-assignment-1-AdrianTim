@@ -1,12 +1,9 @@
 package DataAccessLayer.Implementations;
 
-import BusinessLogicLayer.BusinessEntities.User;
+import DataAccessLayer.Entities.User;
 import DataAccessLayer.DbConnection;
 import DataAccessLayer.IUserDAO;
 
-import javax.swing.plaf.nimbus.State;
-import javax.xml.transform.Result;
-import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;

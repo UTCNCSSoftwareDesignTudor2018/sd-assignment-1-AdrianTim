@@ -1,6 +1,6 @@
 package DataAccessLayer;
 
-import BusinessLogicLayer.BusinessEntities.User;
+import DataAccessLayer.Entities.User;
 
 import java.sql.SQLException;
 

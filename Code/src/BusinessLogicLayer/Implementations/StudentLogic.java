@@ -1,12 +1,16 @@
 package BusinessLogicLayer.Implementations;
 
-import BusinessLogicLayer.BusinessEntities.Course;
-import BusinessLogicLayer.BusinessEntities.Exam;
-import BusinessLogicLayer.BusinessEntities.Grade;
-import BusinessLogicLayer.BusinessEntities.Student;
+import DataAccessLayer.Entities.Course;
+import DataAccessLayer.Entities.Exam;
+import DataAccessLayer.Entities.Grade;
+import DataAccessLayer.Entities.Student;
 import BusinessLogicLayer.IStudentLogic;
+import DataAccessLayer.ICourseDAO;
 import DataAccessLayer.IReflectiveDAO;
+import DataAccessLayer.IStudentDAO;
+import DataAccessLayer.Implementations.CourseDAO;
 import DataAccessLayer.Implementations.ReflectiveDAO;
+import DataAccessLayer.Implementations.StudentDAO;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
@@ -17,11 +21,25 @@ import java.util.stream.Collectors;
 public class StudentLogic implements IStudentLogic{
 
     private IReflectiveDAO reflectiveDAO;
+    private IStudentDAO studentDAO;
+    private ICourseDAO courseDAO;
 
     public StudentLogic(){
 
         reflectiveDAO = new ReflectiveDAO();
+        studentDAO = new StudentDAO();
+        courseDAO = new CourseDAO();
 
+    }
+
+    @Override
+    public Student get(String username) throws SQLException {
+        return studentDAO.get(username);
+    }
+
+    @Override
+    public void insert(Student student) throws IllegalAccessException, SQLException, ClassNotFoundException {
+        reflectiveDAO.insert(student);
     }
 
     @Override
@@ -68,31 +86,37 @@ public class StudentLogic implements IStudentLogic{
     }
 
     @Override
-    public void viewCourses(Student student) throws InvocationTargetException, SQLException, InstantiationException, IllegalAccessException, NoSuchMethodException {
+    public List<Course> viewCourses(Student student) throws InvocationTargetException, SQLException, InstantiationException, IllegalAccessException, NoSuchMethodException {
 
-        List<Course> courses;
-        List<Object>  objects;
-
-        objects = reflectiveDAO.getAll(new Course());
-
-        //courses = objects.stream().filter(o -> o instanceof Course).map(o -> (Course) o).filter(c -> c.)
+        return courseDAO.getCourses(student.getId());
 
     }
 
     @Override
-    public void viewExams(Student student) throws InvocationTargetException, SQLException, InstantiationException, IllegalAccessException, NoSuchMethodException {
+    public List<Exam> viewExams(Student student) throws InvocationTargetException, SQLException, InstantiationException, IllegalAccessException, NoSuchMethodException, NoSuchFieldException {
 
-        List<Exam> exams;
-        List<Object> objects;
+        List<Exam> exams = new LinkedList<>();
+        List<Grade> grades = viewGrades(student);
 
-        objects = reflectiveDAO.getAll(new Exam());
+        for(Grade grade : grades){
 
-        //exams = objects.stream().filter(o -> o instanceof Exam).map(o -> (Exam) o).filter(e -> e.)
+            Exam exam  = new Exam();
+            exam.setId(grade.getExamId());
+
+            exams.add((Exam)reflectiveDAO.get(exam));
+
+        }
+
+        return exams;
 
     }
 
     @Override
-    public void enroll(Student student, String courseId) {
+    public void enroll(Student student, String courseId) throws SQLException {
+
+        // do some more checking, such as, the student should not be able to enrol the same time to a course he is already enrolled in
+
+        courseDAO.insert(student.getId(), courseId);
 
     }
 }

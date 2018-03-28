@@ -1,10 +1,11 @@
 package DataAccessLayer.Implementations;
 
-import BusinessLogicLayer.BusinessEntities.Course;
+import DataAccessLayer.Entities.Course;
 import DataAccessLayer.DbConnection;
 import DataAccessLayer.ICourseDAO;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.LinkedList;
@@ -64,8 +65,27 @@ public class CourseDAO implements ICourseDAO {
 
         StringBuilder sql = new StringBuilder();
 
-        sql.append("SELECT \"id\", \"subject\", \"teacherId\" FROM public.\"Course\" INNER JOIN public.\"MM_Student_Course\" ON \"Course");
+        sql.append("SELECT public.\"Course\".\"id\", public.\"Course\".\"subject\", public.\"Course\".\"teacherId\" \n" +
+                "\tFROM public.\"Course\", public.\"MM_Student_Course\", public.\"Student\"\n" +
+                "\tWHERE public.\"Course\".\"id\" = public.\"MM_Student_Course\".\"courseId\" and public.\"MM_Student_Course\".\"studentId\" = '");
+        sql.append(studentId);
+        sql.append("';");
 
-        return null;
+        ResultSet rs = statement.executeQuery(sql.toString());
+
+        while(rs.next()){
+
+            Course course = new Course();
+
+            course.setId(rs.getString("id"));
+            course.setSubject(rs.getString("subject"));
+            course.setTeacherId(rs.getString("teacherId"));
+
+            courses.add(course);
+
+        }
+
+        return courses;
+
     }
 }

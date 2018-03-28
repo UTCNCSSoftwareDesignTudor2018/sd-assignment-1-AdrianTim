@@ -49,18 +49,20 @@ public class ReflectiveDAO implements IReflectiveDAO {
 
             sql.append(comma);
             comma = ", ";
-            if(f.getType().getSimpleName().equals("String")){
+            if(f.getType().getSimpleName().equals("String") || f.getType().getSimpleName().equals("Date")){
                 sql.append("'");
             }
             Object value = f.get(cls.cast(o));
             sql.append(value.toString());
-            if(f.getType().getSimpleName().equals("String")){
+            if(f.getType().getSimpleName().equals("String") || f.getType().getSimpleName().equals("Date")){
                 sql.append("'");
             }
 
         }
 
         sql.append(");");
+
+        System.out.println(sql.toString());
 
         statement.executeUpdate(sql.toString());
 
