@@ -1,17 +1,19 @@
 package BusinessLogicLayer.BusinessModels;
 
-import DataAccessLayer.Entities.Course;
 import DataAccessLayer.Entities.Grade;
+import DataAccessLayer.Entities.Student;
 
 import java.util.List;
 
 public class Report {
 
+    private Student student;
     private List<Grade> grades;
     private double gradeAverage;
-    private List<Course> courses;
+    private List<CourseModel> courses;
 
-    public Report(List<Grade> grades, double gradeAverage, List<Course> courses) {
+    public Report(Student student, List<Grade> grades, double gradeAverage, List<CourseModel> courses) {
+        this.student = student;
         this.grades = grades;
         this.gradeAverage = gradeAverage;
         this.courses = courses;
@@ -19,6 +21,14 @@ public class Report {
 
     public Report(){
 
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
     }
 
     public List<Grade> getGrades() {
@@ -37,11 +47,11 @@ public class Report {
         this.gradeAverage = gradeAverage;
     }
 
-    public List<Course> getCourses() {
+    public List<CourseModel> getCourses() {
         return courses;
     }
 
-    public void setCourses(List<Course> courses) {
+    public void setCourses(List<CourseModel> courses) {
         this.courses = courses;
     }
 }

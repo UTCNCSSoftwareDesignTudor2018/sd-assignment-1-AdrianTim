@@ -1,6 +1,6 @@
 package DataAccessLayer.Entities;
 
-import java.util.Date;
+import java.sql.Date;
 
 public class Exam {
 

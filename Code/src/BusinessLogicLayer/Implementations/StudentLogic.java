@@ -1,9 +1,8 @@
 package BusinessLogicLayer.Implementations;
 
-import DataAccessLayer.Entities.Course;
-import DataAccessLayer.Entities.Exam;
-import DataAccessLayer.Entities.Grade;
-import DataAccessLayer.Entities.Student;
+import BusinessLogicLayer.BusinessModels.CourseModel;
+import BusinessLogicLayer.BusinessModels.ExamModel;
+import DataAccessLayer.Entities.*;
 import BusinessLogicLayer.IStudentLogic;
 import DataAccessLayer.ICourseDAO;
 import DataAccessLayer.IReflectiveDAO;
@@ -35,6 +34,13 @@ public class StudentLogic implements IStudentLogic{
     @Override
     public Student get(String username) throws SQLException {
         return studentDAO.get(username);
+    }
+
+    @Override
+    public Student getById(String id) throws SQLException, NoSuchFieldException, IllegalAccessException {
+        Student s = new Student();
+        s.setId(id);
+        return (Student)reflectiveDAO.get(s);
     }
 
     @Override
@@ -86,28 +92,67 @@ public class StudentLogic implements IStudentLogic{
     }
 
     @Override
-    public List<Course> viewCourses(Student student) throws InvocationTargetException, SQLException, InstantiationException, IllegalAccessException, NoSuchMethodException {
+    public List<CourseModel> viewCourses(Student student) throws InvocationTargetException, SQLException, InstantiationException, IllegalAccessException, NoSuchMethodException, NoSuchFieldException {
 
-        return courseDAO.getCourses(student.getId());
+        List<Course> courses =  courseDAO.getStudentCourses(student.getId());
+        return createListOfCourseModels(courses);
 
     }
 
     @Override
-    public List<Exam> viewExams(Student student) throws InvocationTargetException, SQLException, InstantiationException, IllegalAccessException, NoSuchMethodException, NoSuchFieldException {
+    public List<CourseModel> viewAvailableCourses(Student student) throws SQLException, NoSuchFieldException, IllegalAccessException {
 
-        List<Exam> exams = new LinkedList<>();
+        List<Course> courses =  courseDAO.getStudentAvailableCourses(student.getId());
+        return createListOfCourseModels(courses);
+
+    }
+
+    @Override
+    public List<Student> getStudentsEnrolled(String courseId) throws SQLException {
+
+        return studentDAO.getStudentsAttendingCourse(courseId);
+
+    }
+
+    private List<CourseModel> createListOfCourseModels(List<Course> courses) throws NoSuchFieldException, IllegalAccessException, SQLException {
+
+        List<CourseModel> result = new LinkedList<>();
+
+        for(Course course : courses){
+
+            Teacher t = new Teacher();
+            t.setId(course.getTeacherId());
+            t = (Teacher)reflectiveDAO.get(t);
+
+            result.add(new CourseModel(course.getId(), course.getSubject(), t.getName()));
+
+        }
+
+        return result;
+
+    }
+
+    @Override
+    public List<ExamModel> viewExams(Student student) throws InvocationTargetException, SQLException, InstantiationException, IllegalAccessException, NoSuchMethodException, NoSuchFieldException {
+
+        List<ExamModel> result = new LinkedList<>();
         List<Grade> grades = viewGrades(student);
 
         for(Grade grade : grades){
 
             Exam exam  = new Exam();
             exam.setId(grade.getExamId());
+            exam = (Exam)reflectiveDAO.get(exam);
 
-            exams.add((Exam)reflectiveDAO.get(exam));
+            Course course = new Course();
+            course.setId(exam.getCourseId());
+            course = (Course)reflectiveDAO.get(course);
+
+            result.add(new ExamModel(course.getSubject(), exam.getDate(), grade.getMark()));
 
         }
 
-        return exams;
+        return result;
 
     }
 
@@ -119,4 +164,5 @@ public class StudentLogic implements IStudentLogic{
         courseDAO.insert(student.getId(), courseId);
 
     }
+
 }

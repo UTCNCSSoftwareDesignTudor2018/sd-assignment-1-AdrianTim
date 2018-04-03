@@ -39,4 +39,18 @@ public class Course {
     public void setTeacherId(String teacherId) {
         this.teacherId = teacherId;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Course course = (Course) o;
+
+        return id.equals(course.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
 }

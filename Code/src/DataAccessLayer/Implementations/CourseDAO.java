@@ -29,10 +29,9 @@ public class CourseDAO implements ICourseDAO {
         sql.append(courseId);
         sql.append("');");
 
+        System.out.println(sql.toString());
+
         statement.executeUpdate(sql.toString());
-
-
-
 
     }
 
@@ -50,13 +49,14 @@ public class CourseDAO implements ICourseDAO {
         sql.append(courseId);
         sql.append("';");
 
+        System.out.println(sql.toString());
 
         statement.executeUpdate(sql.toString());
 
     }
 
     @Override
-    public List<Course> getCourses(String studentId) throws SQLException {
+    public List<Course> getStudentCourses(String studentId) throws SQLException {
 
         List<Course> courses = new LinkedList<>();
 
@@ -65,11 +65,84 @@ public class CourseDAO implements ICourseDAO {
 
         StringBuilder sql = new StringBuilder();
 
-        sql.append("SELECT public.\"Course\".\"id\", public.\"Course\".\"subject\", public.\"Course\".\"teacherId\" \n" +
-                "\tFROM public.\"Course\", public.\"MM_Student_Course\", public.\"Student\"\n" +
-                "\tWHERE public.\"Course\".\"id\" = public.\"MM_Student_Course\".\"courseId\" and public.\"MM_Student_Course\".\"studentId\" = '");
+        sql.append("SELECT distinct public.\"Course\".\"id\", public.\"Course\".\"subject\", public.\"Course\".\"teacherId\"\n" +
+                "\tFROM public.\"Course\", public.\"Student\", public.\"MM_Student_Course\"\n" +
+                "\tWHERE public.\"Student\".\"id\" = '");
         sql.append(studentId);
+        sql.append("' and public.\"Course\".\"id\" = public.\"MM_Student_Course\".\"courseId\";");
+
+        System.out.println(sql.toString());
+
+        ResultSet rs = statement.executeQuery(sql.toString());
+
+        while(rs.next()){
+
+            Course course = new Course();
+
+            course.setId(rs.getString("id"));
+            course.setSubject(rs.getString("subject"));
+            course.setTeacherId(rs.getString("teacherId"));
+
+            courses.add(course);
+
+        }
+
+        return courses;
+
+    }
+
+    @Override
+    public List<Course> getStudentAvailableCourses(String studentId) throws SQLException {
+
+        List<Course> courses = new LinkedList<>();
+
+        Connection c = DbConnection.getInstance();
+        Statement statement = c.createStatement();
+
+        StringBuilder sql = new StringBuilder();
+
+        sql.append("SELECT distinct public.\"Course\".\"id\", public.\"Course\".\"subject\", public.\"Course\".\"teacherId\"\n" +
+                "\tFROM public.\"Course\", public.\"Student\", public.\"MM_Student_Course\"\n" +
+                "\tWHERE public.\"Student\".\"id\" != '");
+        sql.append(studentId);
+        sql.append("' and public.\"Course\".\"id\" != public.\"MM_Student_Course\".\"courseId\";");
+
+        System.out.println(sql.toString());
+
+        ResultSet rs = statement.executeQuery(sql.toString());
+
+        while(rs.next()){
+
+            Course course = new Course();
+
+            course.setId(rs.getString("id"));
+            course.setSubject(rs.getString("subject"));
+            course.setTeacherId(rs.getString("teacherId"));
+
+            courses.add(course);
+
+        }
+
+        return courses;
+
+    }
+
+    @Override
+    public List<Course> getTeacherCourses(String teacherId) throws SQLException {
+
+        List<Course> courses = new LinkedList<>();
+
+        Connection c = DbConnection.getInstance();
+        Statement statement = c.createStatement();
+
+        StringBuilder sql = new StringBuilder();
+
+        sql.append("SELECT \"id\", \"subject\", \"teacherId\"\n" +
+                "\tFROM public.\"Course\" WHERE \"teacherId\"='");
+        sql.append(teacherId);
         sql.append("';");
+
+        System.out.println(sql.toString());
 
         ResultSet rs = statement.executeQuery(sql.toString());
 
